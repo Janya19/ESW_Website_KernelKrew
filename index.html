@@ -188,11 +188,15 @@
                     </div>
                     <div class="legend-item">
                         <div class="legend-color" style="background: #ed8936;"></div>
-                        <span>Path Markers</span>
+                        <span>Path/Point Markers</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-color" style="background: #f56565;"></div>
-                        <span>FAN Nodes</span>
+                        <span>FAN/OFDM Nodes</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #9b59b6;"></div>
+                        <span>Control Points</span>
                     </div>
                 </div>
             </div>
@@ -288,58 +292,214 @@
         }
 
         function loadKMLData(map) {
-            // Sample of locations extracted from the KML file
-            const sampleLocations = [
+            // All locations extracted from the KML file (195 total)
+            const allLocations = [
                 { name: "76", lat: 17.44619952232066, lon: 78.34852468427731 },
                 { name: "75", lat: 17.446227, lon: 78.34814999999999 },
+                { name: "68", lat: 17.446023, lon: 78.34797999999999 },
                 { name: "74", lat: 17.446394, lon: 78.34828999999999 },
                 { name: "73", lat: 17.446497, lon: 78.34814799999999 },
                 { name: "72", lat: 17.446631, lon: 78.347962 },
                 { name: "71", lat: 17.44681, lon: 78.347765 },
-                { name: "70", lat: 17.446474, lon: 78.34786799999999 },
-                { name: "69", lat: 17.446297, lon: 78.34772699999999 },
                 { name: "47", lat: 17.446865, lon: 78.347673 },
                 { name: "48", lat: 17.446699, lon: 78.347448 },
                 { name: "46", lat: 17.447175, lon: 78.34786299999999 },
+                { name: "17", lat: 17.445475, lon: 78.34630299999999 },
+                { name: "53", lat: 17.44569301725863, lon: 78.34652381088188 },
+                { name: "52", lat: 17.445883, lon: 78.34667899999999 },
+                { name: "51", lat: 17.44607187305157, lon: 78.34686451975082 },
+                { name: "50", lat: 17.446195, lon: 78.347019 },
+                { name: "49", lat: 17.446398, lon: 78.347199 },
+                { name: "54", lat: 17.44627476534852, lon: 78.34741236839581 },
+                { name: "55", lat: 17.446095, lon: 78.34764 },
+                { name: "69", lat: 17.446297, lon: 78.34772699999999 },
+                { name: "70", lat: 17.446474, lon: 78.34786799999999 },
+                { name: "56", lat: 17.445937, lon: 78.34773899999999 },
+                { name: "57", lat: 17.44573, lon: 78.34798499999999 },
                 { name: "FG01", lat: 17.447172, lon: 78.348339 },
                 { name: "FG02", lat: 17.447019, lon: 78.348522 },
+                { name: "FG03", lat: 17.44687, lon: 78.348722 },
                 { name: "FG04", lat: 17.44674921632886, lon: 78.34888852743995 },
+                { name: "FG05", lat: 17.446517, lon: 78.348952 },
                 { name: "FG06", lat: 17.446306, lon: 78.34875699999999 },
+                { name: "FG07", lat: 17.44639612538461, lon: 78.34849904779078 },
+                { name: "FG08", lat: 17.446511, lon: 78.34835699999999 },
+                { name: "FG09", lat: 17.446647, lon: 78.34817699999999 },
+                { name: "FG10", lat: 17.446749, lon: 78.34805299999999 },
+                { name: "FG11", lat: 17.4469642933468, lon: 78.34740860333886 },
+                { name: "FG12", lat: 17.447141, lon: 78.34810399999999 },
+                { name: "58", lat: 17.44561, lon: 78.34821199999999 },
+                { name: "13", lat: 17.443792, lon: 78.348626 },
                 { name: "PT1", lat: 17.44337491515873, lon: 78.34767522592064 },
                 { name: "PT2", lat: 17.44543, lon: 78.34807499999999 },
+                { name: "14", lat: 17.443481, lon: 78.348429 },
+                { name: "PT3", lat: 17.44536817543993, lon: 78.34800576013515 },
+                { name: "15", lat: 17.443271, lon: 78.348275 },
+                { name: "17AC", lat: 17.443292, lon: 78.34811499999999 },
+                { name: "PT4", lat: 17.4453032094296, lon: 78.34793009551851 },
+                { name: "17Y", lat: 17.444088, lon: 78.348072 },
+                { name: "PT5", lat: 17.44523362762706, lon: 78.34785982879995 },
+                { name: "17X", lat: 17.444213, lon: 78.34821199999999 },
+                { name: "PT6", lat: 17.44517338056619, lon: 78.34778230380783 },
+                { name: "PT7", lat: 17.4451149002452, lon: 78.34771332588328 },
+                { name: "F12", lat: 17.447141, lon: 78.34810399999999 },
+                { name: "PT8", lat: 17.44506268753254, lon: 78.34763496271333 },
+                { name: "PT9", lat: 17.44499746084332, lon: 78.34756346530222 },
+                { name: "PT10", lat: 17.44492202388292, lon: 78.34763358353652 },
+                { name: "PT11", lat: 17.44486250036371, lon: 78.34770768473473 },
+                { name: "PT12", lat: 17.44480427674916, lon: 78.3477799644493 },
+                { name: "PT13", lat: 17.44474364099586, lon: 78.34785610799324 },
+                { name: "PT14", lat: 17.44467895773593, lon: 78.34792780120716 },
+                { name: "PT15", lat: 17.4445976779502, lon: 78.34802326209324 },
+                { name: "PT16", lat: 17.4445410131585, lon: 78.34809020119512 },
+                { name: "PT17", lat: 17.44448242604712, lon: 78.34815872276877 },
+                { name: "PT18", lat: 17.44442666383976, lon: 78.34822610820105 },
+                { name: "PT19", lat: 17.44436482277825, lon: 78.34829214174299 },
+                { name: "PT20", lat: 17.44430058034134, lon: 78.34837409420962 },
                 { name: "PT21", lat: 17.44426344206056, lon: 78.34843289708081 },
+                { name: "PT22", lat: 17.44436933339242, lon: 78.3481930752917 },
                 { name: "20", lat: 17.44538152203957, lon: 78.35092025611901 },
                 { name: "18", lat: 17.4450287676693, lon: 78.35056090704659 },
                 { name: "22", lat: 17.44505206906337, lon: 78.35058273747249 },
                 { name: "7", lat: 17.444882, lon: 78.35041 },
                 { name: "8", lat: 17.44469699163722, lon: 78.35027604578934 },
+                { name: "18", lat: 17.44435471475089, lon: 78.34996430881148 },
+                { name: "10", lat: 17.44443866671934, lon: 78.34970774807188 },
+                { name: "11", lat: 17.44457568077327, lon: 78.34955919374454 },
+                { name: "12", lat: 17.4447631134627, lon: 78.34930520182411 },
+                { name: "13", lat: 17.44488522691679, lon: 78.34917064569558 },
+                { name: "14", lat: 17.445018, lon: 78.348979 },
+                { name: "15", lat: 17.44513913304483, lon: 78.34881542003021 },
+                { name: "16", lat: 17.44532081456592, lon: 78.34854662033548 },
+                { name: "67", lat: 17.44577236515129, lon: 78.34839410854397 },
+                { name: "78", lat: 17.445964, lon: 78.348601 },
+                { name: "77", lat: 17.44613843334093, lon: 78.3487548095147 },
+                { name: "80", lat: 17.44627246162533, lon: 78.34887110448845 },
+                { name: "81", lat: 17.44646959604249, lon: 78.34903001732026 },
+                { name: "82", lat: 17.446943, lon: 78.34908399999999 },
+                { name: "83", lat: 17.44670242235806, lon: 78.34925238562106 },
+                { name: "84", lat: 17.44691625110263, lon: 78.34945160004109 },
+                { name: "38", lat: 17.446889, lon: 78.349611 },
+                { name: "37", lat: 17.44674033492009, lon: 78.349833675903 },
+                { name: "17T", lat: 17.444209, lon: 78.34774899999999 },
+                { name: "17S", lat: 17.444107, lon: 78.34755199999999 },
+                { name: "17R", lat: 17.443909, lon: 78.34743999999999 },
+                { name: "17Q", lat: 17.443726, lon: 78.34747299999999 },
+                { name: "17P", lat: 17.443526, lon: 78.347499 },
+                { name: "17O", lat: 17.44336, lon: 78.347534 },
+                { name: "27", lat: 17.445514, lon: 78.35121699999999 },
+                { name: "17N", lat: 17.443187, lon: 78.347532 },
+                { name: "31", lat: 17.44580016085631, lon: 78.35094309087214 },
+                { name: "17M", lat: 17.443004, lon: 78.347506 },
+                { name: "17L", lat: 17.442977, lon: 78.34763 },
+                { name: "32", lat: 17.44591, lon: 78.350765 },
+                { name: "17K", lat: 17.442831, lon: 78.34769899999999 },
+                { name: "17J", lat: 17.442905, lon: 78.34777099999999 },
+                { name: "33", lat: 17.44607655996507, lon: 78.35059310217338 },
+                { name: "17I", lat: 17.44275, lon: 78.34787 },
+                { name: "34", lat: 17.446228, lon: 78.35039399999999 },
+                { name: "17H", lat: 17.442676, lon: 78.348055 },
+                { name: "35", lat: 17.446363, lon: 78.35024 },
+                { name: "17G", lat: 17.44257, lon: 78.34836 },
+                { name: "17F", lat: 17.442736, lon: 78.34845799999999 },
+                { name: "36", lat: 17.446543, lon: 78.350038 },
+                { name: "17E", lat: 17.442933, lon: 78.348612 },
+                { name: "17D", lat: 17.44311028998291, lon: 78.34879563992222 },
+                { name: "17C", lat: 17.44323, lon: 78.34890999999999 },
+                { name: "17B", lat: 17.4434, lon: 78.349063 },
+                { name: "17A", lat: 17.443547, lon: 78.34920199999999 },
+                { name: "17", lat: 17.44339838927748, lon: 78.34866318694014 },
+                { name: "3", lat: 17.44375, lon: 78.34937699999999 },
+                { name: "4", lat: 17.443754, lon: 78.349237 },
+                { name: "5", lat: 17.443795, lon: 78.349025 },
+                { name: "6", lat: 17.44383890589354, lon: 78.34883526046721 },
+                { name: "2", lat: 17.44391142265171, lon: 78.34955556735662 },
+                { name: "1", lat: 17.444091, lon: 78.349745 },
+                { name: "39", lat: 17.447015, lon: 78.349453 },
+                { name: "40", lat: 17.447174, lon: 78.34926899999999 },
+                { name: "41", lat: 17.44733918728992, lon: 78.34908154937698 },
+                { name: "43", lat: 17.447682, lon: 78.348676 },
+                { name: "42", lat: 17.44753037444844, lon: 78.34886425308106 },
+                { name: "44", lat: 17.447607, lon: 78.348259 },
+                { name: "45", lat: 17.447409, lon: 78.34809 },
+                { name: "4", lat: 17.44515484874572, lon: 78.349983702835 },
+                { name: "5", lat: 17.44535171776548, lon: 78.34977860774055 },
+                { name: "6", lat: 17.445564, lon: 78.349507 },
+                { name: "79A", lat: 17.445802, lon: 78.349192 },
+                { name: "Vindya A6 TOP", lat: 17.4460433441503, lon: 78.34914759194912 },
+                { name: "Faculty Quarter Control Point", lat: 17.44374348487684, lon: 78.34872839884655 },
+                { name: "KRB TOP", lat: 17.44505147678683, lon: 78.34931752016303 },
+                { name: "Vindya A2 TOP", lat: 17.44516750643943, lon: 78.35018758136472 },
+                { name: "Vindya C4 TOP", lat: 17.4459695319244, lon: 78.35012274996274 },
+                { name: "Football Ground Control Point", lat: 17.44711359372943, lon: 78.34849746345587 },
                 { name: "FAN1.1 Border Router", lat: 17.44534766259706, lon: 78.34951256667128 },
-                { name: "FAN1.0 FSK Border Router", lat: 17.44528755531169, lon: 78.34944933562031 }
+                { name: "Nilgiri Control Point", lat: 17.44729732289277, lon: 78.34890867783535 },
+                { name: "9", lat: 17.44452304565228, lon: 78.35012522231355 },
+                { name: "3", lat: 17.44509124514719, lon: 78.34986705669994 },
+                { name: "19", lat: 17.44523966017816, lon: 78.35073897554001 },
+                { name: "26", lat: 17.44541194611386, lon: 78.35094926669557 },
+                { name: "79", lat: 17.44608885745689, lon: 78.3488447556942 },
+                { name: "FAN1.1 FSK Border Router", lat: 17.44506871213177, lon: 78.34928773851298 },
+                { name: "FAN1.0 FSK Border Router", lat: 17.44528755531169, lon: 78.34944933562031 },
+                { name: "17Z", lat: 17.44386218866903, lon: 78.3480096981323 },
+                { name: "node test", lat: 17.44564775084006, lon: 78.34981173856887 },
+                { name: "2", lat: 17.44516830167157, lon: 78.34973089788286 },
+                { name: "1", lat: 17.44508069663543, lon: 78.34973735964793 },
+                { name: "65", lat: 17.44456976157717, lon: 78.3495819992358 },
+                { name: "20", lat: 17.444693, lon: 78.350241 },
+                { name: "80", lat: 17.44637769953568, lon: 78.34888779116821 },
+                { name: "83", lat: 17.44665512763077, lon: 78.34914623577306 },
+                { name: "OFDM Node 1", lat: 17.44616768296407, lon: 78.34961703748374 },
+                { name: "OFDM Node 2", lat: 17.44562400537042, lon: 78.35026034419332 },
+                { name: "Point 1", lat: 17.44492966550332, lon: 78.35022477080601 },
+                { name: "Point 2", lat: 17.44497218945286, lon: 78.35019793651438 },
+                { name: "Point 3", lat: 17.44503491124108, lon: 78.35015780766803 },
+                { name: "Point 4", lat: 17.44507952325796, lon: 78.35010828917606 },
+                { name: "Point 5", lat: 17.44514270797373, lon: 78.35004193936452 },
+                { name: "Point 6", lat: 17.44518164666579, lon: 78.34998616924989 },
+                { name: "Point 7", lat: 17.44522793419192, lon: 78.34993151470968 },
+                { name: "Point 8", lat: 17.44528590962604, lon: 78.34986761175331 },
+                { name: "Point 9", lat: 17.44533437513946, lon: 78.34980703787647 },
+                { name: "Point 10", lat: 17.44541226297871, lon: 78.34971890711111 },
+                { name: "Point 11", lat: 17.44546742746367, lon: 78.34964075826203 },
+                { name: "Point 12", lat: 17.4453533676584, lon: 78.34978042490283 },
+                { name: "Point 13", lat: 17.44552481147194, lon: 78.34956664498759 },
+                { name: "Point 14", lat: 17.4456232079763, lon: 78.3494790491518 },
+                { name: "Point 15", lat: 17.44567521647158, lon: 78.34941147439474 },
+                { name: "Point 16", lat: 17.44574009547296, lon: 78.34933817169912 },
+                { name: "Point 17", lat: 17.44579117797464, lon: 78.34926820528845 },
+                { name: "Point 18", lat: 17.44584869649956, lon: 78.34919779402021 },
+                { name: "Point 19", lat: 17.44589049168858, lon: 78.34912965015427 },
+                { name: "Point 20", lat: 17.44594306567297, lon: 78.34905835308217 },
+                { name: "Connection 1", lat: 17.44491018205892, lon: 78.35023841279167 },
+                { name: "Connection 2", lat: 17.44498884955436, lon: 78.35019544956893 }
             ];
 
             const bounds = [];
 
-            sampleLocations.forEach(loc => {
+            allLocations.forEach(loc => {
                 let color = '#667eea';
                 if (loc.name.includes('FG') || loc.name.includes('Football')) {
                     color = '#48bb78';
-                } else if (loc.name.includes('PT')) {
+                } else if (loc.name.includes('PT') || loc.name.includes('Point') || loc.name.includes('Connection')) {
                     color = '#ed8936';
-                } else if (loc.name.includes('FAN')) {
+                } else if (loc.name.includes('FAN') || loc.name.includes('Border Router') || loc.name.includes('OFDM')) {
                     color = '#f56565';
+                } else if (loc.name.includes('Control Point') || loc.name.includes('TOP') || loc.name.includes('KRB') || loc.name.includes('Vindya') || loc.name.includes('Nilgiri')) {
+                    color = '#9b59b6';
                 }
 
                 const marker = L.circleMarker([loc.lat, loc.lon], {
-                    radius: 6,
+                    radius: 5,
                     fillColor: color,
                     color: '#fff',
-                    weight: 2,
+                    weight: 1.5,
                     opacity: 1,
                     fillOpacity: 0.8
                 }).addTo(map);
                 
                 marker.bindPopup(`
-                    <strong>Pole ID:</strong> ${loc.name}<br>
+                    <strong>ID:</strong> ${loc.name}<br>
                     <strong>Lat:</strong> ${loc.lat.toFixed(6)}<br>
                     <strong>Lon:</strong> ${loc.lon.toFixed(6)}
                 `);
@@ -347,13 +507,13 @@
                 bounds.push([loc.lat, loc.lon]);
             });
 
-            document.getElementById('poleCount').textContent = sampleLocations.length;
+            document.getElementById('poleCount').textContent = allLocations.length;
             
             if (bounds.length > 0) {
                 map.fitBounds(bounds, { padding: [50, 50] });
             }
             
-            console.log('✓ Map loaded successfully! Total features:', sampleLocations.length);
+            console.log('✓ Map loaded successfully! Total features:', allLocations.length);
         }
 
         // Try to initialize immediately
