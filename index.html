@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wi-SUN Project Analysis</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 950px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        header {
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: center;
+            border-left: 5px solid #007bff;
+        }
+        h1 {
+            color: #222;
+            margin: 0;
+        }
+        .content-box {
+            background: #fff;
+            padding: 30px;
+            margin-top: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        h2 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            color: #007bff;
+        }
+        
+        /* Responsive iFrame for Map */
+        .map-container {
+            position: relative;
+            padding-bottom: 75%; /* 4:3 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .map-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* iFrame for Interactive Plot */
+        .interactive-plot {
+            width: 100%;
+            height: 500px; /* Adjust height as needed */
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        /* Plot Gallery */
+        .plot-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        .plot-gallery img {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            border: 1px solid #eee;
+        }
+        .plot-gallery figcaption {
+            text-align: center;
+            font-style: italic;
+            color: #555;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Wi-SUN Network Analysis at IIITH</h1>
+            <p>A project showcasing sensor data, network performance, and spatial analysis on campus.</p>
+        </header>
+
+        <div class="content-box">
+            <h2>Interactive Map of Sensor Nodes</h2>
+            <p>The following map shows all the light pole locations where sensor nodes were placed. You can click on each point for details.</p>
+            
+            <div class="map-container">
+                <iframe src="YOUR_GOOGLE_MY_MAPS_EMBED_LINK_HERE"></iframe>
+            </div>
+        </div>
+
+        <div class="content-box">
+            <h2>Interactive Plot: Link Reciprocity</h2>
+            <p>This plot is fully interactive. You can pan, zoom, and hover over data points for details.</p>
+            
+            <iframe 
+                class="interactive-plot"
+                src="link_reciprocity.html"
+                title="Interactive Plotly Graph: Link Reciprocity">
+            </iframe>
+        </div>
+
+        <div class="content-box">
+            <h2>Data Analysis Plots</h2>
+            <p>Below are the static plots generated from the data analysis.</p>
+            
+            <div class="plot-gallery">
+                <figure>
+                    <img src="pathloss_fit_meters.png" alt="Pathloss Fit in Meters">
+                    <figcaption>Pathloss Fit (meters)</figcaption>
+                </figure>
+                
+                <figure>
+                    <img src="rsl_1d_profile_meters.png" alt="RSL 1D Profile in Meters">
+                    <figcaption>RSL 1D Profile (meters)</figcaption>
+                </figure>
+
+                <figure>
+                    <img src="humidity_vs_rsl.png" alt="Humidity vs RSL">
+                    <figcaption>Humidity vs. RSL</figcaption>
+                </figure>
+
+                <figure>
+                    <img src="env_corr_matrix.png" alt="Environmental Correlation Matrix">
+                    <figcaption>Environmental Correlation Matrix</figcaption>
+                </figure>
+
+                <figure>
+                    <img src="hopcount_rpl_rank.png" alt="Hopcount vs RPL Rank">
+                    <figcaption>Hopcount vs. RPL Rank</figcaption>
+                </figure>
+
+                <figure>
+                    <img src="temperature_anomaly.png" alt="Temperature Anomaly">
+                    <figcaption>Temperature Anomaly</figcaption>
+                </figure>
+
+                <figure>
+                    <img src="time_position_heatmap.png" alt="Time Position Heatmap">
+                    <figcaption>Time Position Heatmap</figcaption>
+                </figure>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
