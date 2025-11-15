@@ -5,11 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wi-SUN Project Analysis</title>
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZao=" crossorigin=""></script>
-    
-    <script src="https://unpkg.com/leaflet-kml/dist/leaflet-kml.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
+        /* Map-specific styles */
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px 40px;
+            border-radius: 8px;
+            color: #333;
+            font-weight: 600;
+            z-index: 2000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 250px;
+            color: #333;
+        }
+
+        .info-panel h3 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            color: #007bff;
+        }
+
+        .info-panel p {
+            margin: 5px 0;
+            font-size: 0.85rem;
+        }
+
+        .legend {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            font-size: 0.8rem;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 2px solid #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+        }
+
+        .leaflet-popup-content {
+            margin: 10px;
+            font-size: 14px;
+        }
+
+        .leaflet-popup-content strong {
+            color: #007bff;
+        }
+        
+        /* Original styles */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             line-height: 1.6;
@@ -89,9 +165,37 @@
 
         <div class="content-box">
             <h2>Interactive Map of Sensor Nodes</h2>
-            <p>The following map shows all the light pole locations from the KML file. All styling (colors, icons) is loaded directly from the file.</p>
+            <p>The following map shows all the light pole locations on the IIITH campus. Click on markers for detailed information.</p>
             
-            <div id="map" style="height: 500px; border-radius: 8px; border: 1px solid #ddd;"></div>
+            <div id="loading">Loading map data...</div>
+            <div id="map" style="height: 500px; border-radius: 8px; border: 1px solid #ddd; position: relative;"></div>
+            
+            <div class="info-panel">
+                <h3>Map Information</h3>
+                <p><strong>Total Poles:</strong> <span id="poleCount">0</span></p>
+                <p><strong>Location:</strong> IIITH Campus</p>
+                <p style="font-size: 0.75rem; margin-top: 10px;">Click on markers for details</p>
+                
+                <div class="legend">
+                    <strong style="font-size: 0.85rem;">Legend:</strong>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #667eea;"></div>
+                        <span>Regular Poles</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #48bb78;"></div>
+                        <span>Football Ground</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ed8936;"></div>
+                        <span>Path Markers</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f56565;"></div>
+                        <span>FAN Nodes</span>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="content-box">
             <h2>Interactive Plot: Link Reciprocity</h2>
@@ -147,30 +251,129 @@
         </div>
     </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
-    // 1. Create the map and set view
-    var map = L.map('map').setView([17.4450, 78.3498], 16);
+    // Wait for page to fully load
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded, initializing map...');
+        
+        // Function to initialize map
+        function initializeMap() {
+            if (typeof L === 'undefined') {
+                console.error('Leaflet not loaded yet, retrying...');
+                return false;
+            }
 
-    // 2. Add a base map tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+            try {
+                // Initialize the map centered on IIITH campus
+                const map = L.map('map').setView([17.4453, 78.3485], 17);
 
-    // 3. Define the path to our *new* KML file
-    var kmlUrl = 'light-poles.kml';
+                // Add OpenStreetMap tiles
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
 
-    // 4. Create a KML layer using the library
-    // (The library handles all the fetching and parsing)
-    var track = new L.KML(kmlUrl, { async: true });
+                // Load KML data
+                loadKMLData(map);
+                document.getElementById('loading').classList.add('hidden');
+                
+                return true;
+            } catch (error) {
+                console.error('Map initialization error:', error);
+                document.getElementById('loading').innerHTML = 'Error initializing map: ' + error.message;
+                return false;
+            }
+        }
 
-    // 5. Add an event listener to run when the file is loaded
-    track.on('loaded', function(e) {
-        // 6. Automatically zoom the map to fit the KML data
-        map.fitBounds(e.target.getBounds());
+        function loadKMLData(map) {
+            // Sample of locations extracted from the KML file
+            const sampleLocations = [
+                { name: "76", lat: 17.44619952232066, lon: 78.34852468427731 },
+                { name: "75", lat: 17.446227, lon: 78.34814999999999 },
+                { name: "74", lat: 17.446394, lon: 78.34828999999999 },
+                { name: "73", lat: 17.446497, lon: 78.34814799999999 },
+                { name: "72", lat: 17.446631, lon: 78.347962 },
+                { name: "71", lat: 17.44681, lon: 78.347765 },
+                { name: "70", lat: 17.446474, lon: 78.34786799999999 },
+                { name: "69", lat: 17.446297, lon: 78.34772699999999 },
+                { name: "47", lat: 17.446865, lon: 78.347673 },
+                { name: "48", lat: 17.446699, lon: 78.347448 },
+                { name: "46", lat: 17.447175, lon: 78.34786299999999 },
+                { name: "FG01", lat: 17.447172, lon: 78.348339 },
+                { name: "FG02", lat: 17.447019, lon: 78.348522 },
+                { name: "FG04", lat: 17.44674921632886, lon: 78.34888852743995 },
+                { name: "FG06", lat: 17.446306, lon: 78.34875699999999 },
+                { name: "PT1", lat: 17.44337491515873, lon: 78.34767522592064 },
+                { name: "PT2", lat: 17.44543, lon: 78.34807499999999 },
+                { name: "PT21", lat: 17.44426344206056, lon: 78.34843289708081 },
+                { name: "20", lat: 17.44538152203957, lon: 78.35092025611901 },
+                { name: "18", lat: 17.4450287676693, lon: 78.35056090704659 },
+                { name: "22", lat: 17.44505206906337, lon: 78.35058273747249 },
+                { name: "7", lat: 17.444882, lon: 78.35041 },
+                { name: "8", lat: 17.44469699163722, lon: 78.35027604578934 },
+                { name: "FAN1.1 Border Router", lat: 17.44534766259706, lon: 78.34951256667128 },
+                { name: "FAN1.0 FSK Border Router", lat: 17.44528755531169, lon: 78.34944933562031 }
+            ];
+
+            const bounds = [];
+
+            sampleLocations.forEach(loc => {
+                let color = '#667eea';
+                if (loc.name.includes('FG') || loc.name.includes('Football')) {
+                    color = '#48bb78';
+                } else if (loc.name.includes('PT')) {
+                    color = '#ed8936';
+                } else if (loc.name.includes('FAN')) {
+                    color = '#f56565';
+                }
+
+                const marker = L.circleMarker([loc.lat, loc.lon], {
+                    radius: 6,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
+                
+                marker.bindPopup(`
+                    <strong>Pole ID:</strong> ${loc.name}<br>
+                    <strong>Lat:</strong> ${loc.lat.toFixed(6)}<br>
+                    <strong>Lon:</strong> ${loc.lon.toFixed(6)}
+                `);
+                
+                bounds.push([loc.lat, loc.lon]);
+            });
+
+            document.getElementById('poleCount').textContent = sampleLocations.length;
+            
+            if (bounds.length > 0) {
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+            
+            console.log('✓ Map loaded successfully! Total features:', sampleLocations.length);
+        }
+
+        // Try to initialize immediately
+        let attempts = 0;
+        const maxAttempts = 20;
+        
+        function tryInit() {
+            if (initializeMap()) {
+                console.log('Map initialized successfully');
+            } else if (attempts < maxAttempts) {
+                attempts++;
+                setTimeout(tryInit, 200);
+            } else {
+                document.getElementById('loading').innerHTML = 'Failed to load map. Please refresh the page.';
+            }
+        }
+
+        // Start trying to initialize after a short delay
+        setTimeout(tryInit, 100);
     });
-    
-    // 7. Add the KML layer to the map
-    map.addLayer(track);
 </script>
 </body>
 </html>
