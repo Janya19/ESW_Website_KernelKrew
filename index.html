@@ -147,48 +147,30 @@
         </div>
     </div>
 
-<script type="text/javascript">
-    // 1. Initialize the Leaflet map
-    // Centered on IIITH [lat, long], zoom level 16
+<script>
+    // 1. Create the map and set view
     var map = L.map('map').setView([17.4450, 78.3498], 16);
 
-    // 2. Add a base map tile layer (OpenStreetMap)
+    // 2. Add a base map tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // 3. Load your KML file
-    // IMPORTANT: The file name must be exact!
-    var kmlFile = 'JKB IIITH-CAMP LIGHT POLE LOCATION.kml';
+    // 3. Define the path to our *new* KML file
+    var kmlUrl = 'light-poles.kml';
 
-    fetch(kmlFile)
-        .then(res => res.text())
-        .then(kmltext => {
-            // Parse the KML text
-            var parser = new DOMParser();
-            var kml = parser.parseFromString(kmltext, 'text/xml');
+    // 4. Create a KML layer using the library
+    // (The library handles all the fetching and parsing)
+    var track = new L.KML(kmlUrl, { async: true });
 
-            // Add the KML layer to the map
-            var track = new L.KML(kml);
-            map.addLayer(track);
-
-            // Adjust map view to fit the KML data
-            try {
-                var bounds = track.getBounds();
-                if (bounds.isValid()) {
-                    map.fitBounds(bounds);
-                }
-            } catch (e) {
-                console.warn("Could not fit map to KML bounds:", e);
-            }
-        })
-        .catch(error => {
-            console.error('Error loading or parsing KML file:', error);
-            // Display an error on the map
-            L.marker(map.getCenter()).addTo(map)
-                .bindPopup('<b>Error</b><br>Could not load KML file.<br>Check console for details.')
-                .openPopup();
-        });
+    // 5. Add an event listener to run when the file is loaded
+    track.on('loaded', function(e) {
+        // 6. Automatically zoom the map to fit the KML data
+        map.fitBounds(e.target.getBounds());
+    });
+    
+    // 7. Add the KML layer to the map
+    map.addLayer(track);
 </script>
 </body>
 </html>
