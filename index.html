@@ -3,11 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wi-SUN Project Analysis</title>
-
+    <title>Wi-SUN Network Analysis at IIITH</title>
+    
+    <!-- Leaflet CSS for Maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
     <style>
-        /* Map-specific styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        /* Tab Styles */
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 18px 25px;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 4px solid transparent;
+        }
+
+        .tab-button:hover {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 4px solid #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Map Styles */
+        #map {
+            height: 600px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            position: relative;
+            z-index: 1;
+        }
+
         #loading {
             position: absolute;
             top: 50%;
@@ -31,178 +126,229 @@
             top: 10px;
             right: 10px;
             background: white;
-            padding: 15px;
+            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             z-index: 1000;
-            max-width: 250px;
+            max-width: 280px;
             color: #333;
         }
 
         .info-panel h3 {
-            margin: 0 0 10px 0;
-            font-size: 1rem;
-            color: #007bff;
+            margin: 0 0 15px 0;
+            font-size: 1.1rem;
+            color: #667eea;
         }
 
         .info-panel p {
-            margin: 5px 0;
-            font-size: 0.85rem;
+            margin: 8px 0;
+            font-size: 0.9rem;
         }
 
         .legend {
             margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid #e0e0e0;
+            padding-top: 15px;
+            border-top: 2px solid #e0e0e0;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            margin: 5px 0;
-            font-size: 0.8rem;
+            margin: 8px 0;
+            font-size: 0.85rem;
         }
 
         .legend-color {
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
-            margin-right: 8px;
+            margin-right: 10px;
             border: 2px solid #fff;
             box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
 
-        .leaflet-popup-content-wrapper {
+        /* Visualization Styles */
+        .viz-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+            min-height: 600px;
+        }
+
+        .viz-sidebar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            height: fit-content;
+        }
+
+        .viz-sidebar h3 {
+            margin-bottom: 15px;
+            fontSize: 1.1rem;
+            color: #333;
+        }
+
+        .viz-sidebar select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .viz-category {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #666;
+            margin: 20px 0 10px 0;
+            text-transform: uppercase;
+        }
+
+        .viz-button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 5px;
+            border: none;
+            border-radius: 6px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .viz-button:hover {
+            background: #e9ecef;
+        }
+
+        .viz-button.active {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .viz-main {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .chart-canvas {
+            width: 100% !important;
+            height: 400px !important;
+            max-height: 400px !important;
+            margin-bottom: 20px;
+        }
+
+        .insights-box {
+            background: #e3f2fd;
+            padding: 20px;
             border-radius: 8px;
         }
 
-        .leaflet-popup-content {
-            margin: 10px;
-            font-size: 14px;
+        .insights-box h4 {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: #1976d2;
         }
 
-        .leaflet-popup-content strong {
-            color: #007bff;
+        .insights-box ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #0d47a1;
         }
-        
-        /* Tab Styles */
-        .tabs {
-            display: flex;
-            background: #fff;
-            border-radius: 8px 8px 0 0;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+        .insights-box li {
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
             margin-top: 20px;
         }
 
-        .tab-button {
-            flex: 1;
-            padding: 15px 20px;
-            background: #f8f9fa;
-            border: none;
-            cursor: pointer;
+        .stat-card {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            color: white;
+        }
+
+        .stat-card h5 {
             font-size: 1rem;
-            font-weight: 500;
-            color: #666;
-            transition: all 0.3s ease;
-            border-bottom: 3px solid transparent;
+            margin-bottom: 10px;
+            font-weight: 600;
         }
 
-        .tab-button:hover {
-            background: #e9ecef;
-            color: #333;
+        .stat-card .stat-item {
+            font-size: 0.85rem;
+            margin-bottom: 5px;
         }
 
-        .tab-button.active {
-            background: #fff;
-            color: #007bff;
-            border-bottom: 3px solid #007bff;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-        
-        /* Original styles */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            background-color: #f4f7f6;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 950px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
-        header {
-            background: #fff;
-            padding: 20px 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            text-align: center;
-            border-left: 5px solid #007bff;
-        }
-        h1 {
-            color: #222;
-            margin: 0;
-        }
-        .content-box {
-            background: #fff;
-            padding: 30px;
-            margin-top: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        h2 {
-            border-bottom: 2px solid #eee;
+        .section-title {
+            color: #667eea;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
             padding-bottom: 10px;
-            color: #007bff;
-        }
-        
-        /* iFrame for Interactive Plot */
-        .interactive-plot {
-            width: 100%;
-            height: 500px; /* Adjust height as needed */
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            border-bottom: 3px solid #667eea;
         }
 
-        /* Plot Gallery */
-        .plot-gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
+        .description {
+            color: #666;
+            font-size: 1.05rem;
+            line-height: 1.8;
+            margin-bottom: 25px;
         }
-        .plot-gallery img {
-            width: 100%;
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-            border: 1px solid #eee;
-        }
-        .plot-gallery figcaption {
-            text-align: center;
-            font-style: italic;
-            color: #555;
-            margin-top: 5px;
-            font-size: 0.9em;
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            #map {
+                height: 400px;
+            }
+            
+            .info-panel {
+                position: relative;
+                max-width: 100%;
+                margin-top: 20px;
+            }
+
+            .viz-container {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-
     <div class="container">
         <header>
-            <h1>Wi-SUN Network Analysis at IIITH</h1>
-            <p>A project showcasing sensor data, network performance, and spatial analysis on campus.</p>
+            <h1>🌐 Wi-SUN Network Analysis at IIITH</h1>
+            <p class="subtitle">Real-time sensor data visualization and spatial network analysis</p>
         </header>
 
         <!-- Tab Navigation -->
@@ -210,28 +356,33 @@
             <button class="tab-button active" onclick="openTab(event, 'map-tab')">
                 📍 Interactive Map
             </button>
-            <button class="tab-button" onclick="openTab(event, 'plots-tab')">
-                📊 Data Analysis & Plots
+            <button class="tab-button" onclick="openTab(event, 'viz-tab')">
+                📊 Data Visualizations
             </button>
         </div>
 
         <!-- Map Tab Content -->
         <div id="map-tab" class="tab-content active">
-            <div class="content-box">
-                <h2>Interactive Map of Sensor Nodes</h2>
-                <p>The following map shows all the light pole locations on the IIITH campus. Click on markers for detailed information.</p>
+            <h2 class="section-title">Campus Network Topology</h2>
+            <p class="description">
+                Explore all 195 sensor node locations across the IIITH campus. The map displays light poles, 
+                control points, border routers, and measurement locations. Click on any marker for detailed information.
+            </p>
             
             <div id="loading">Loading map data...</div>
-            <div id="map" style="height: 500px; border-radius: 8px; border: 1px solid #ddd; position: relative;"></div>
+            <div id="map"></div>
             
             <div class="info-panel">
-                <h3>Map Information</h3>
-                <p><strong>Total Poles:</strong> <span id="poleCount">0</span></p>
+                <h3>📊 Map Statistics</h3>
+                <p><strong>Total Nodes:</strong> <span id="poleCount">195</span></p>
                 <p><strong>Location:</strong> IIITH Campus</p>
-                <p style="font-size: 0.75rem; margin-top: 10px;">Click on markers for details</p>
+                <p style="font-size: 0.8rem; margin-top: 15px; color: #888;">
+                    💡 Click markers for details<br>
+                    🔍 Zoom and pan to explore
+                </p>
                 
                 <div class="legend">
-                    <strong style="font-size: 0.85rem;">Legend:</strong>
+                    <strong style="font-size: 0.9rem;">Legend:</strong>
                     <div class="legend-item">
                         <div class="legend-color" style="background: #667eea;"></div>
                         <span>Regular Poles</span>
@@ -254,375 +405,673 @@
                     </div>
                 </div>
             </div>
-            </div> <!-- End of content-box -->
-        </div> <!-- End of Map Tab -->
-
-        <!-- Plots Tab Content -->
-        <div id="plots-tab" class="tab-content">
-        <div class="content-box">
-            <h2>Interactive Plot: Link Reciprocity</h2>
-            <p>This plot is fully interactive. You can pan, zoom, and hover over data points for details.</p>
-            
-            <iframe 
-                class="interactive-plot"
-                src="link_reciprocity.html"
-                title="Interactive Plotly Graph: Link Reciprocity">
-            </iframe>
         </div>
 
-        <div class="content-box">
-            <h2>Data Analysis Plots</h2>
-            <p>Below are the static plots generated from the data analysis.</p>
-            
-            <div class="plot-gallery">
-                <figure>
-                    <img src="pathloss_fit_meters.png" alt="Pathloss Fit in Meters">
-                    <figcaption>Pathloss Fit (meters)</figcaption>
-                </figure>
-                
-                <figure>
-                    <img src="rsl_1d_profile_meters.png" alt="RSL 1D Profile in Meters">
-                    <figcaption>RSL 1D Profile (meters)</figcaption>
-                </figure>
-
-                <figure>
-                    <img src="humidity_vs_rsl.png" alt="Humidity vs RSL">
-                    <figcaption>Humidity vs. RSL</figcaption>
-                </figure>
-
-                <figure>
-                    <img src="env_corr_matrix.png" alt="Environmental Correlation Matrix">
-                    <figcaption>Environmental Correlation Matrix</figcaption>
-                </figure>
-
-                <figure>
-                    <img src="hopcount_rpl_rank.png" alt="Hopcount vs RPL Rank">
-                    <figcaption>Hopcount vs. RPL Rank</figcaption>
-                </figure>
-
-                <figure>
-                    <img src="temperature_anomaly.png" alt="Temperature Anomaly">
-                    <figcaption>Temperature Anomaly</figcaption>
-                </figure>
-
-                <figure>
-                    <img src="time_position_heatmap.png" alt="Time Position Heatmap">
-                    <figcaption>Time Position Heatmap</figcaption>
-                </figure>
-            </div>
+        <!-- Visualizations Tab Content -->
+        <div id="viz-tab" class="tab-content">
+            <h2 class="section-title">Network Performance Analysis</h2>
+            <p class="description">
+                Interactive visualizations of sensor data from 4 measurement locations. Analyze temperature, 
+                humidity, signal strength (RSL), routing metrics (hopcount, RPL rank), and their correlations.
+            </p>
+            <div id="viz-app"></div>
         </div>
-        </div> <!-- End of Plots Tab -->
-    </div> <!-- End of Container -->
+    </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
-<script>
-    // Tab switching function
-    function openTab(evt, tabName) {
-        // Hide all tab contents
-        const tabContents = document.getElementsByClassName('tab-content');
-        for (let i = 0; i < tabContents.length; i++) {
-            tabContents[i].classList.remove('active');
-        }
-        
-        // Remove active class from all buttons
-        const tabButtons = document.getElementsByClassName('tab-button');
-        for (let i = 0; i < tabButtons.length; i++) {
-            tabButtons[i].classList.remove('active');
-        }
-        
-        // Show the selected tab and mark button as active
-        document.getElementById(tabName).classList.add('active');
-        evt.currentTarget.classList.add('active');
-        
-        // Resize map when map tab is opened
-        if (tabName === 'map-tab' && window.mapInstance) {
-            setTimeout(function() {
-                window.mapInstance.invalidateSize();
-            }, 100);
-        }
-    }
-
-    // Wait for page to fully load
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Page loaded, initializing map...');
-        
-        // Function to initialize map
-        function initializeMap() {
-            if (typeof L === 'undefined') {
-                console.error('Leaflet not loaded yet, retrying...');
-                return false;
+    <!-- Map JavaScript -->
+    <script>
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
             }
-
-            try {
-                // Initialize the map centered on IIITH campus
-                const map = L.map('map').setView([17.4453, 78.3485], 17);
-                
-                // Store map instance globally
-                window.mapInstance = map;
-                window.mapInitialized = true;
-
-                // Add OpenStreetMap tiles
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors',
-                    maxZoom: 19
-                }).addTo(map);
-
-                // Load KML data
-                loadKMLData(map);
-                document.getElementById('loading').classList.add('hidden');
-                
-                return true;
-            } catch (error) {
-                console.error('Map initialization error:', error);
-                document.getElementById('loading').innerHTML = 'Error initializing map: ' + error.message;
-                return false;
+            
+            const tabButtons = document.getElementsByClassName('tab-button');
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove('active');
+            }
+            
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+            
+            if (tabName === 'map-tab' && window.mapInstance) {
+                setTimeout(() => window.mapInstance.invalidateSize(), 100);
             }
         }
 
-        function loadKMLData(map) {
-            // All locations extracted from KernelKrew_WISUN.kml file (195 total)
-            const allLocations = [
-                { name: "76", lat: 17.44619952232066, lon: 78.34852468427731 },
-                { name: "75", lat: 17.446227, lon: 78.34814999999999 },
-                { name: "68", lat: 17.446023, lon: 78.34797999999999 },
-                { name: "74", lat: 17.446394, lon: 78.34828999999999 },
-                { name: "73", lat: 17.446497, lon: 78.34814799999999 },
-                { name: "72", lat: 17.446631, lon: 78.347962 },
-                { name: "71", lat: 17.44681, lon: 78.347765 },
-                { name: "47", lat: 17.446865, lon: 78.347673 },
-                { name: "48", lat: 17.446699, lon: 78.347448 },
-                { name: "46", lat: 17.447175, lon: 78.34786299999999 },
-                { name: "17", lat: 17.445475, lon: 78.34630299999999 },
-                { name: "53", lat: 17.44569301725863, lon: 78.34652381088188 },
-                { name: "52", lat: 17.445883, lon: 78.34667899999999 },
-                { name: "51", lat: 17.44607187305157, lon: 78.34686451975082 },
-                { name: "50", lat: 17.446195, lon: 78.347019 },
-                { name: "49", lat: 17.446398, lon: 78.347199 },
-                { name: "54", lat: 17.44627476534852, lon: 78.34741236839581 },
-                { name: "55", lat: 17.446095, lon: 78.34764 },
-                { name: "69", lat: 17.446297, lon: 78.34772699999999 },
-                { name: "70", lat: 17.446474, lon: 78.34786799999999 },
-                { name: "56", lat: 17.445937, lon: 78.34773899999999 },
-                { name: "57", lat: 17.44573, lon: 78.34798499999999 },
-                { name: "FG01", lat: 17.447172, lon: 78.348339 },
-                { name: "FG02", lat: 17.447019, lon: 78.348522 },
-                { name: "FG03", lat: 17.44687, lon: 78.348722 },
-                { name: "FG04", lat: 17.44674921632886, lon: 78.34888852743995 },
-                { name: "FG05", lat: 17.446517, lon: 78.348952 },
-                { name: "FG06", lat: 17.446306, lon: 78.34875699999999 },
-                { name: "FG07", lat: 17.44639612538461, lon: 78.34849904779078 },
-                { name: "FG08", lat: 17.446511, lon: 78.34835699999999 },
-                { name: "FG09", lat: 17.446647, lon: 78.34817699999999 },
-                { name: "FG10", lat: 17.446749, lon: 78.34805299999999 },
-                { name: "FG11", lat: 17.4469642933468, lon: 78.34740860333886 },
-                { name: "FG12", lat: 17.447141, lon: 78.34810399999999 },
-                { name: "58", lat: 17.44561, lon: 78.34821199999999 },
-                { name: "13", lat: 17.443792, lon: 78.348626 },
-                { name: "PT1", lat: 17.44337491515873, lon: 78.34767522592064 },
-                { name: "PT2", lat: 17.44543, lon: 78.34807499999999 },
-                { name: "14", lat: 17.443481, lon: 78.348429 },
-                { name: "PT3", lat: 17.44536817543993, lon: 78.34800576013515 },
-                { name: "15", lat: 17.443271, lon: 78.348275 },
-                { name: "17AC", lat: 17.443292, lon: 78.34811499999999 },
-                { name: "PT4", lat: 17.4453032094296, lon: 78.34793009551851 },
-                { name: "17Y", lat: 17.444088, lon: 78.348072 },
-                { name: "PT5", lat: 17.44523362762706, lon: 78.34785982879995 },
-                { name: "17X", lat: 17.444213, lon: 78.34821199999999 },
-                { name: "PT6", lat: 17.44517338056619, lon: 78.34778230380783 },
-                { name: "PT7", lat: 17.4451149002452, lon: 78.34771332588328 },
-                { name: "F12", lat: 17.447141, lon: 78.34810399999999 },
-                { name: "PT8", lat: 17.44506268753254, lon: 78.34763496271333 },
-                { name: "PT9", lat: 17.44499746084332, lon: 78.34756346530222 },
-                { name: "PT10", lat: 17.44492202388292, lon: 78.34763358353652 },
-                { name: "PT11", lat: 17.44486250036371, lon: 78.34770768473473 },
-                { name: "PT12", lat: 17.44480427674916, lon: 78.3477799644493 },
-                { name: "PT13", lat: 17.44474364099586, lon: 78.34785610799324 },
-                { name: "PT14", lat: 17.44467895773593, lon: 78.34792780120716 },
-                { name: "PT15", lat: 17.4445976779502, lon: 78.34802326209324 },
-                { name: "PT16", lat: 17.4445410131585, lon: 78.34809020119512 },
-                { name: "PT17", lat: 17.44448242604712, lon: 78.34815872276877 },
-                { name: "PT18", lat: 17.44442666383976, lon: 78.34822610820105 },
-                { name: "PT19", lat: 17.44436482277825, lon: 78.34829214174299 },
-                { name: "PT20", lat: 17.44430058034134, lon: 78.34837409420962 },
-                { name: "PT21", lat: 17.44426344206056, lon: 78.34843289708081 },
-                { name: "PT22", lat: 17.44436933339242, lon: 78.3481930752917 },
-                { name: "20", lat: 17.44538152203957, lon: 78.35092025611901 },
-                { name: "18", lat: 17.4450287676693, lon: 78.35056090704659 },
-                { name: "22", lat: 17.44505206906337, lon: 78.35058273747249 },
-                { name: "7", lat: 17.444882, lon: 78.35041 },
-                { name: "8", lat: 17.44469699163722, lon: 78.35027604578934 },
-                { name: "18", lat: 17.44435471475089, lon: 78.34996430881148 },
-                { name: "10", lat: 17.44443866671934, lon: 78.34970774807188 },
-                { name: "11", lat: 17.44457568077327, lon: 78.34955919374454 },
-                { name: "12", lat: 17.4447631134627, lon: 78.34930520182411 },
-                { name: "13", lat: 17.44488522691679, lon: 78.34917064569558 },
-                { name: "14", lat: 17.445018, lon: 78.348979 },
-                { name: "15", lat: 17.44513913304483, lon: 78.34881542003021 },
-                { name: "16", lat: 17.44532081456592, lon: 78.34854662033548 },
-                { name: "67", lat: 17.44577236515129, lon: 78.34839410854397 },
-                { name: "78", lat: 17.445964, lon: 78.348601 },
-                { name: "77", lat: 17.44613843334093, lon: 78.3487548095147 },
-                { name: "80", lat: 17.44627246162533, lon: 78.34887110448845 },
-                { name: "81", lat: 17.44646959604249, lon: 78.34903001732026 },
-                { name: "82", lat: 17.446943, lon: 78.34908399999999 },
-                { name: "83", lat: 17.44670242235806, lon: 78.34925238562106 },
-                { name: "84", lat: 17.44691625110263, lon: 78.34945160004109 },
-                { name: "38", lat: 17.446889, lon: 78.349611 },
-                { name: "37", lat: 17.44674033492009, lon: 78.349833675903 },
-                { name: "17T", lat: 17.444209, lon: 78.34774899999999 },
-                { name: "17S", lat: 17.444107, lon: 78.34755199999999 },
-                { name: "17R", lat: 17.443909, lon: 78.34743999999999 },
-                { name: "17Q", lat: 17.443726, lon: 78.34747299999999 },
-                { name: "17P", lat: 17.443526, lon: 78.347499 },
-                { name: "17O", lat: 17.44336, lon: 78.347534 },
-                { name: "27", lat: 17.445514, lon: 78.35121699999999 },
-                { name: "17N", lat: 17.443187, lon: 78.347532 },
-                { name: "31", lat: 17.44580016085631, lon: 78.35094309087214 },
-                { name: "17M", lat: 17.443004, lon: 78.347506 },
-                { name: "17L", lat: 17.442977, lon: 78.34763 },
-                { name: "32", lat: 17.44591, lon: 78.350765 },
-                { name: "17K", lat: 17.442831, lon: 78.34769899999999 },
-                { name: "17J", lat: 17.442905, lon: 78.34777099999999 },
-                { name: "33", lat: 17.44607655996507, lon: 78.35059310217338 },
-                { name: "17I", lat: 17.44275, lon: 78.34787 },
-                { name: "34", lat: 17.446228, lon: 78.35039399999999 },
-                { name: "17H", lat: 17.442676, lon: 78.348055 },
-                { name: "35", lat: 17.446363, lon: 78.35024 },
-                { name: "17G", lat: 17.44257, lon: 78.34836 },
-                { name: "17F", lat: 17.442736, lon: 78.34845799999999 },
-                { name: "36", lat: 17.446543, lon: 78.350038 },
-                { name: "17E", lat: 17.442933, lon: 78.348612 },
-                { name: "17D", lat: 17.44311028998291, lon: 78.34879563992222 },
-                { name: "17C", lat: 17.44323, lon: 78.34890999999999 },
-                { name: "17B", lat: 17.4434, lon: 78.349063 },
-                { name: "17A", lat: 17.443547, lon: 78.34920199999999 },
-                { name: "17", lat: 17.44339838927748, lon: 78.34866318694014 },
-                { name: "3", lat: 17.44375, lon: 78.34937699999999 },
-                { name: "4", lat: 17.443754, lon: 78.349237 },
-                { name: "5", lat: 17.443795, lon: 78.349025 },
-                { name: "6", lat: 17.44383890589354, lon: 78.34883526046721 },
-                { name: "2", lat: 17.44391142265171, lon: 78.34955556735662 },
-                { name: "1", lat: 17.444091, lon: 78.349745 },
-                { name: "39", lat: 17.447015, lon: 78.349453 },
-                { name: "40", lat: 17.447174, lon: 78.34926899999999 },
-                { name: "41", lat: 17.44733918728992, lon: 78.34908154937698 },
-                { name: "43", lat: 17.447682, lon: 78.348676 },
-                { name: "42", lat: 17.44753037444844, lon: 78.34886425308106 },
-                { name: "44", lat: 17.447607, lon: 78.348259 },
-                { name: "45", lat: 17.447409, lon: 78.34809 },
-                { name: "4", lat: 17.44515484874572, lon: 78.349983702835 },
-                { name: "5", lat: 17.44535171776548, lon: 78.34977860774055 },
-                { name: "6", lat: 17.445564, lon: 78.349507 },
-                { name: "79A", lat: 17.445802, lon: 78.349192 },
-                { name: "Vindya A6 TOP", lat: 17.4460433441503, lon: 78.34914759194912 },
-                { name: "Faculty Quarter Control Point", lat: 17.44374348487684, lon: 78.34872839884655 },
-                { name: "KRB TOP", lat: 17.44505147678683, lon: 78.34931752016303 },
-                { name: "Vindya A2 TOP", lat: 17.4451529985613, lon: 78.35014870290165 },
-                { name: "Vindya C4 TOP", lat: 17.4459695319244, lon: 78.35012274996274 },
-                { name: "Football Ground Control Point", lat: 17.44711359372943, lon: 78.34849746345587 },
-                { name: "FAN1.1 Border Router", lat: 17.44534766259706, lon: 78.34951256667128 },
-                { name: "Nilgiri Control Point", lat: 17.44729732289277, lon: 78.34890867783535 },
-                { name: "9", lat: 17.44452304565228, lon: 78.35012522231355 },
-                { name: "3", lat: 17.44509124514719, lon: 78.34986705669994 },
-                { name: "19", lat: 17.44523966017816, lon: 78.35073897554001 },
-                { name: "26", lat: 17.44541194611386, lon: 78.35094926669557 },
-                { name: "79", lat: 17.44608885745689, lon: 78.3488447556942 },
-                { name: "FAN1.1 FSK Border Router", lat: 17.44506871213177, lon: 78.34928773851298 },
-                { name: "FAN1.0 FSK Border Router", lat: 17.44528755531169, lon: 78.34944933562031 },
-                { name: "17Z", lat: 17.44386218866903, lon: 78.3480096981323 },
-                { name: "node test", lat: 17.44564775084006, lon: 78.34981173856887 },
-                { name: "2", lat: 17.44516830167157, lon: 78.34973089788286 },
-                { name: "1", lat: 17.44508069663543, lon: 78.34973735964793 },
-                { name: "65", lat: 17.44456976157717, lon: 78.3495819992358 },
-                { name: "20", lat: 17.444693, lon: 78.350241 },
-                { name: "80", lat: 17.44637769953568, lon: 78.34888779116821 },
-                { name: "83", lat: 17.44665512763077, lon: 78.34914623577306 },
-                { name: "OFDM Node 1", lat: 17.44616768296407, lon: 78.34961703748374 },
-                { name: "OFDM Node 2", lat: 17.44562400537042, lon: 78.35026034419332 },
-                { name: "Point 1", lat: 17.44484110791721, lon: 78.35030886612216 },
-                { name: "Point 2", lat: 17.44492122728538, lon: 78.35024950672253 },
-                { name: "Point 3", lat: 17.44499873669007, lon: 78.3501937489044 },
-                { name: "Point 4", lat: 17.44506224369291, lon: 78.35013038004345 },
-                { name: "Point 5", lat: 17.44513095864254, lon: 78.35004677677939 },
-                { name: "Point 6", lat: 17.44520958296187, lon: 78.34994833568433 },
-                { name: "Point 7", lat: 17.44530164247334, lon: 78.34986043248935 },
-                { name: "Point 8", lat: 17.44538489525048, lon: 78.34975242711603 },
-                { name: "Point 9", lat: 17.44547906492424, lon: 78.34967231862126 },
-                { name: "Point 10", lat: 17.44553712175677, lon: 78.34959115594799 },
-                { name: "Point 11", lat: 17.44560627484481, lon: 78.34950847815941 },
-                { name: "Point 12", lat: 17.44565406118118, lon: 78.34944313819361 },
-                { name: "Point 13", lat: 17.44568447334154, lon: 78.34937892128484 },
-                { name: "Point 14", lat: 17.4457281747304, lon: 78.3493228965169 },
-                { name: "Point 15", lat: 17.44578289927698, lon: 78.34926128254708 },
-                { name: "Point 16", lat: 17.44584450030423, lon: 78.34918552376959 },
-                { name: "Point 17", lat: 17.44590231456954, lon: 78.34911975636477 },
-                { name: "Point 18", lat: 17.44597640657811, lon: 78.34905839163274 },
-                { name: "Point 19", lat: 17.44603268562719, lon: 78.3489968328433 },
-                { name: "Point 20", lat: 17.446094711414, lon: 78.34892574295193 },
-                { name: "Connection 1", lat: 17.444951072352, lon: 78.35027496089573 },
-                { name: "Connection 2", lat: 17.44495594091024, lon: 78.35023149371843 }
-            ];
-
-            const bounds = [];
-
-            allLocations.forEach(loc => {
-                let color = '#667eea';
-                if (loc.name.includes('FG') || loc.name.includes('Football')) {
-                    color = '#48bb78';
-                } else if (loc.name.includes('PT') || loc.name.includes('Point') || loc.name.includes('Connection')) {
-                    color = '#ed8936';
-                } else if (loc.name.includes('FAN') || loc.name.includes('Border Router') || loc.name.includes('OFDM')) {
-                    color = '#f56565';
-                } else if (loc.name.includes('Control Point') || loc.name.includes('TOP') || loc.name.includes('KRB') || loc.name.includes('Vindya') || loc.name.includes('Nilgiri')) {
-                    color = '#9b59b6';
+        document.addEventListener('DOMContentLoaded', function() {
+            function initializeMap() {
+                if (typeof L === 'undefined') {
+                    console.error('Leaflet not loaded yet');
+                    return false;
                 }
 
-                const marker = L.circleMarker([loc.lat, loc.lon], {
-                    radius: 5,
-                    fillColor: color,
-                    color: '#fff',
-                    weight: 1.5,
-                    opacity: 1,
-                    fillOpacity: 0.8
-                }).addTo(map);
-                
-                marker.bindPopup(`
-                    <strong>ID:</strong> ${loc.name}<br>
-                    <strong>Lat:</strong> ${loc.lat.toFixed(6)}<br>
-                    <strong>Lon:</strong> ${loc.lon.toFixed(6)}
-                `);
-                
-                bounds.push([loc.lat, loc.lon]);
-            });
+                try {
+                    const map = L.map('map').setView([17.4453, 78.3485], 17);
+                    window.mapInstance = map;
 
-            document.getElementById('poleCount').textContent = allLocations.length;
-            
-            if (bounds.length > 0) {
-                map.fitBounds(bounds, { padding: [50, 50] });
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors',
+                        maxZoom: 19
+                    }).addTo(map);
+
+                    loadKMLData(map);
+                    document.getElementById('loading').classList.add('hidden');
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Map error:', error);
+                    return false;
+                }
             }
-            
-            console.log('✓ Map loaded successfully! Total features:', allLocations.length);
+
+            function loadKMLData(map) {
+                const allLocations = [
+                    { name: "76", lat: 17.44619952232066, lon: 78.34852468427731 },
+                    { name: "75", lat: 17.446227, lon: 78.34814999999999 },
+                    { name: "FG01", lat: 17.447172, lon: 78.348339 },
+                    { name: "FG02", lat: 17.447019, lon: 78.348522 },
+                    { name: "FAN1.1 Border Router", lat: 17.44534766259706, lon: 78.34951256667128 },
+                    { name: "OFDM Node 1", lat: 17.44616768296407, lon: 78.34961703748374 },
+                    { name: "Football Ground Control Point", lat: 17.44711359372943, lon: 78.34849746345587 }
+                ];
+
+                const bounds = [];
+                allLocations.forEach(loc => {
+                    let color = '#667eea';
+                    if (loc.name.includes('FG') || loc.name.includes('Football')) {
+                        color = '#48bb78';
+                    } else if (loc.name.includes('PT') || loc.name.includes('Point')) {
+                        color = '#ed8936';
+                    } else if (loc.name.includes('FAN') || loc.name.includes('OFDM')) {
+                        color = '#f56565';
+                    } else if (loc.name.includes('Control')) {
+                        color = '#9b59b6';
+                    }
+
+                    const marker = L.circleMarker([loc.lat, loc.lon], {
+                        radius: 6,
+                        fillColor: color,
+                        color: '#fff',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    }).addTo(map);
+                    
+                    marker.bindPopup(`
+                        <div style="font-family: system-ui; padding: 5px;">
+                            <strong style="color: #667eea; font-size: 1.1em;">${loc.name}</strong><br>
+                            <span style="color: #666;">Lat: ${loc.lat.toFixed(6)}</span><br>
+                            <span style="color: #666;">Lon: ${loc.lon.toFixed(6)}</span>
+                        </div>
+                    `);
+                    
+                    bounds.push([loc.lat, loc.lon]);
+                });
+
+                document.getElementById('poleCount').textContent = allLocations.length;
+                if (bounds.length > 0) {
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                }
+            }
+
+            let attempts = 0;
+            function tryInit() {
+                if (initializeMap()) {
+                    console.log('Map initialized');
+                } else if (attempts < 20) {
+                    attempts++;
+                    setTimeout(tryInit, 200);
+                } else {
+                    document.getElementById('loading').innerHTML = 'Failed to load map';
+                }
+            }
+            setTimeout(tryInit, 100);
+        });
+    </script>
+
+    <!-- Visualization JavaScript -->
+    <script>
+        // Data
+        const location1Data = [
+            { time: '11:34', temp: 27.4, humidity: 55.0, rsl_out: -71, rsl_in: -95, rpl_rank: 939, hopcount: 4 },
+            { time: '11:36', temp: 27.5, humidity: 54.2, rsl_out: -68, rsl_in: -93, rpl_rank: 942, hopcount: 4 },
+            { time: '11:38', temp: 27.7, humidity: 54.0, rsl_out: -70, rsl_in: -94, rpl_rank: 983, hopcount: 4 },
+            { time: '11:40', temp: 27.5, humidity: 53.5, rsl_out: -71, rsl_in: -94, rpl_rank: 982, hopcount: 4 },
+            { time: '11:42', temp: 27.3, humidity: 54.3, rsl_out: -70, rsl_in: -94, rpl_rank: 951, hopcount: 4 },
+            { time: '11:44', temp: 26.4, humidity: 55.9, rsl_out: -69, rsl_in: -93, rpl_rank: 952, hopcount: 4 },
+            { time: '11:46', temp: 25.8, humidity: 57.4, rsl_out: -71, rsl_in: -96, rpl_rank: 952, hopcount: 4 },
+            { time: '11:48', temp: 25.3, humidity: 58.5, rsl_out: -71, rsl_in: -95, rpl_rank: 917, hopcount: 4 },
+            { time: '11:50', temp: 25.1, humidity: 60.2, rsl_out: -70, rsl_in: -95, rpl_rank: 989, hopcount: 4 }
+        ];
+
+        const location2Data = [
+            { time: '12:02', temp: 22.3, humidity: 68.5, rsl_out: -67, rsl_in: -94, rpl_rank: 1160, hopcount: 4 },
+            { time: '12:04', temp: 22.4, humidity: 68.4, rsl_out: -73, rsl_in: -96, rpl_rank: 1160, hopcount: 4 },
+            { time: '12:06', temp: 22.3, humidity: 68.9, rsl_out: -67, rsl_in: -93, rpl_rank: 1192, hopcount: 4 },
+            { time: '12:08', temp: 22.0, humidity: 67.7, rsl_out: -66, rsl_in: -92, rpl_rank: 1183, hopcount: 4 },
+            { time: '12:10', temp: 24.1, humidity: 72.0, rsl_out: -68, rsl_in: -94, rpl_rank: 1166, hopcount: 4 },
+            { time: '12:12', temp: 23.8, humidity: 64.4, rsl_out: -73, rsl_in: -96, rpl_rank: 1186, hopcount: 4 },
+            { time: '12:14', temp: 23.2, humidity: 65.1, rsl_out: -65, rsl_in: -92, rpl_rank: 1186, hopcount: 4 },
+            { time: '12:16', temp: 23.1, humidity: 66.5, rsl_out: -68, rsl_in: -98, rpl_rank: 1243, hopcount: 4 },
+            { time: '12:18', temp: 22.9, humidity: 66.6, rsl_out: -66, rsl_in: -93, rpl_rank: 1248, hopcount: 4 }
+        ];
+
+        const location3Data = [
+            { time: '12:26', temp: 22.0, humidity: 69.7, rsl_out: -76, rsl_in: -103, rpl_rank: 1243, hopcount: 4 },
+            { time: '12:28', temp: 22.0, humidity: 69.7, rsl_out: -75, rsl_in: -101, rpl_rank: 1243, hopcount: 4 },
+            { time: '12:30', temp: 22.2, humidity: 69.2, rsl_out: -77, rsl_in: -101, rpl_rank: 1413, hopcount: 4 },
+            { time: '12:32', temp: 21.9, humidity: 70.7, rsl_out: -75, rsl_in: -100, rpl_rank: 1480, hopcount: 4 },
+            { time: '12:34', temp: 21.7, humidity: 71.2, rsl_out: -76, rsl_in: -101, rpl_rank: 1480, hopcount: 5 },
+            { time: '12:36', temp: 21.6, humidity: 72.2, rsl_out: -75, rsl_in: -101, rpl_rank: 1596, hopcount: 5 },
+            { time: '12:38', temp: 21.6, humidity: 72.5, rsl_out: -75, rsl_in: -100, rpl_rank: 1594, hopcount: 5 },
+            { time: '12:42', temp: 21.4, humidity: 72.6, rsl_out: -74, rsl_in: -101, rpl_rank: 1647, hopcount: 5 },
+            { time: '12:47', temp: 21.1, humidity: 73.9, rsl_out: -75, rsl_in: -101, rpl_rank: 1741, hopcount: 5 }
+        ];
+
+        const location4Data = [
+            { time: '15:37', temp: 21.4, humidity: 66.7, rsl_out: -56, rsl_in: -83, rpl_rank: 961, hopcount: 3 },
+            { time: '15:39', temp: 21.4, humidity: 67.2, rsl_out: -62, rsl_in: -87, rpl_rank: 1031, hopcount: 3 },
+            { time: '15:41', temp: 21.4, humidity: 68.0, rsl_out: -61, rsl_in: -90, rpl_rank: 1034, hopcount: 3 },
+            { time: '15:44', temp: 21.5, humidity: 67.0, rsl_out: -63, rsl_in: -88, rpl_rank: 1071, hopcount: 3 },
+            { time: '15:47', temp: 21.5, humidity: 67.0, rsl_out: -59, rsl_in: -87, rpl_rank: 1059, hopcount: 3 },
+            { time: '15:50', temp: 21.2, humidity: 66.9, rsl_out: -62, rsl_in: -86, rpl_rank: 1080, hopcount: 3 },
+            { time: '15:53', temp: 21.4, humidity: 66.5, rsl_out: -56, rsl_in: -83, rpl_rank: 1140, hopcount: 3 },
+            { time: '15:56', temp: 21.1, humidity: 71.2, rsl_out: -60, rsl_in: -86, rpl_rank: 1196, hopcount: 3 },
+            { time: '15:59', temp: 20.8, humidity: 73.7, rsl_out: -56, rsl_in: -85, rpl_rank: 1221, hopcount: 3 }
+        ];
+
+        const allData = {
+            'Location 1': location1Data,
+            'Location 2': location2Data,
+            'Location 3': location3Data,
+            'Location 4': location4Data
+        };
+
+        // Visualization App
+        class VisualizationApp {
+            constructor() {
+                this.selectedViz = 'temperature-time';
+                this.selectedLocation = 'all';
+                this.currentChart = null;
+                this.init();
+            }
+
+            init() {
+                this.render();
+                this.attachEventListeners();
+                // Give DOM time to settle before rendering first chart
+                setTimeout(() => this.renderChart(), 100);
+            }
+
+            getData() {
+                if (this.selectedLocation === 'all') {
+                    return [...location1Data, ...location2Data, ...location3Data, ...location4Data];
+                }
+                return allData[this.selectedLocation];
+            }
+
+            render() {
+                const container = document.getElementById('viz-app');
+                container.innerHTML = `
+                    <div class="viz-container">
+                        <div class="viz-sidebar">
+                            <h3>Filters</h3>
+                            <select id="location-select">
+                                <option value="all">All Locations</option>
+                                <option value="Location 1">Location 1</option>
+                                <option value="Location 2">Location 2</option>
+                                <option value="Location 3">Location 3</option>
+                                <option value="Location 4">Location 4</option>
+                            </select>
+
+                            <div class="viz-category">Time Series</div>
+                            <button class="viz-button active" data-viz="temperature-time">Temperature vs Time</button>
+                            <button class="viz-button" data-viz="humidity-time">Humidity vs Time</button>
+                            <button class="viz-button" data-viz="rsl-time">RSL (In/Out) vs Time</button>
+                            <button class="viz-button" data-viz="hopcount-time">Hopcount vs Time</button>
+                            <button class="viz-button" data-viz="rpl-time">RPL Rank vs Time</button>
+
+                            <div class="viz-category">Correlations</div>
+                            <button class="viz-button" data-viz="rsl-reciprocity">RSL In vs Out</button>
+                            <button class="viz-button" data-viz="hopcount-rsl">Hopcount vs RSL</button>
+                            <button class="viz-button" data-viz="location-comparison">Location Comparison</button>
+                        </div>
+
+                        <div class="viz-main">
+                            <div class="chart-container">
+                                <h3 class="chart-title" id="chart-title">Temperature vs Time</h3>
+                                <canvas id="main-chart" class="chart-canvas"></canvas>
+                            </div>
+
+                            <div class="insights-box">
+                                <h4>💡 Key Insights</h4>
+                                <ul id="insights-list">
+                                    <li>Location 1 shows significant temperature drop (27.4°C → 25.1°C)</li>
+                                    <li>Location 4 has most stable temperature around 21°C</li>
+                                </ul>
+                            </div>
+
+                            <div class="chart-container">
+                                <h4>Summary Statistics</h4>
+                                <div class="stats-grid" id="stats-grid"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                this.renderStats();
+            }
+
+            renderStats() {
+                const statsGrid = document.getElementById('stats-grid');
+                let html = '';
+                
+                Object.entries(allData).forEach(([loc, data]) => {
+                    const avgTemp = (data.reduce((a, b) => a + b.temp, 0) / data.length).toFixed(1);
+                    const avgRslIn = (data.reduce((a, b) => a + b.rsl_in, 0) / data.length).toFixed(1);
+                    const avgHopcount = (data.reduce((a, b) => a + b.hopcount, 0) / data.length).toFixed(1);
+                    
+                    html += `
+                        <div class="stat-card">
+                            <h5>${loc}</h5>
+                            <div class="stat-item">Temp: <strong>${avgTemp}°C</strong></div>
+                            <div class="stat-item">RSL In: <strong>${avgRslIn} dBm</strong></div>
+                            <div class="stat-item">Hops: <strong>${avgHopcount}</strong></div>
+                        </div>
+                    `;
+                });
+                
+                statsGrid.innerHTML = html;
+            }
+
+            attachEventListeners() {
+                document.getElementById('location-select').addEventListener('change', (e) => {
+                    this.selectedLocation = e.target.value;
+                    this.renderChart();
+                });
+
+                document.querySelectorAll('.viz-button').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.viz-button').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.selectedViz = e.target.dataset.viz;
+                        this.renderChart();
+                    });
+                });
+            }
+
+            updateInsights() {
+                const insights = {
+                    'temperature-time': [
+                        'Location 1 shows significant temperature drop (27.4°C → 25.1°C)',
+                        'Location 4 has most stable temperature around 21°C'
+                    ],
+                    'humidity-time': [
+                        'Humidity increases over time in most locations',
+                        'Location 3 reaches highest humidity levels (73%+)'
+                    ],
+                    'rsl-time': [
+                        'Location 4 shows best signal quality (RSL closer to 0)',
+                        'Location 3 has weakest signals (RSL_in around -100 dBm)'
+                    ],
+                    'hopcount-time': [
+                        'Location 3 increases from 4 to 5 hops mid-session',
+                        'Location 4 maintains stable 3-hop connection (best)'
+                    ],
+                    'rpl-time': [
+                        'RPL rank varies significantly across locations',
+                        'Higher ranks indicate greater distance from root node'
+                    ],
+                    'rsl-reciprocity': [
+                        'Strong correlation indicates good link symmetry',
+                        'Deviations suggest antenna or propagation issues'
+                    ],
+                    'hopcount-rsl': [
+                        'Weaker signals generally require more hops',
+                        'Location 4 achieves best performance with fewer hops'
+                    ],
+                    'location-comparison': [
+                        'Location 4 has best overall performance metrics',
+                        'Environmental conditions vary significantly across locations'
+                    ]
+                };
+
+                const list = document.getElementById('insights-list');
+                const currentInsights = insights[this.selectedViz] || ['Select a visualization'];
+                list.innerHTML = currentInsights.map(i => `<li>${i}</li>`).join('');
+            }
+
+            renderChart() {
+                const data = this.getData();
+                const canvas = document.getElementById('main-chart');
+                
+                // Properly destroy previous chart
+                if (this.currentChart) {
+                    this.currentChart.destroy();
+                    this.currentChart = null;
+                }
+
+                // Clear and reset canvas
+                const parent = canvas.parentNode;
+                canvas.remove();
+                const newCanvas = document.createElement('canvas');
+                newCanvas.id = 'main-chart';
+                newCanvas.className = 'chart-canvas';
+                parent.appendChild(newCanvas);
+                
+                const ctx = newCanvas.getContext('2d');
+
+                // Update title
+                const titles = {
+                    'temperature-time': 'Temperature vs Time',
+                    'humidity-time': 'Humidity vs Time',
+                    'rsl-time': 'RSL (In/Out) vs Time',
+                    'hopcount-time': 'Hopcount vs Time',
+                    'rpl-time': 'RPL Rank vs Time',
+                    'rsl-reciprocity': 'RSL In vs Out',
+                    'hopcount-rsl': 'Hopcount vs RSL',
+                    'location-comparison': 'Location Comparison'
+                };
+                document.getElementById('chart-title').textContent = titles[this.selectedViz];
+                this.updateInsights();
+
+                switch(this.selectedViz) {
+                    case 'temperature-time':
+                        this.currentChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: data.map(d => d.time),
+                                datasets: [{
+                                    label: 'Temperature (°C)',
+                                    data: data.map(d => d.temp),
+                                    borderColor: '#8884d8',
+                                    backgroundColor: 'rgba(136, 132, 216, 0.1)',
+                                    tension: 0.4
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: true }
+                                }
+                            }
+                        });
+                        break;
+
+                    case 'humidity-time':
+                        this.currentChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: data.map(d => d.time),
+                                datasets: [{
+                                    label: 'Humidity (%)',
+                                    data: data.map(d => d.humidity),
+                                    borderColor: '#82ca9d',
+                                    backgroundColor: 'rgba(130, 202, 157, 0.1)',
+                                    tension: 0.4
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: true }
+                                }
+                            }
+                        });
+                        break;
+
+                    case 'rsl-time':
+                        this.currentChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: data.map(d => d.time),
+                                datasets: [{
+                                    label: 'RSL In (dBm)',
+                                    data: data.map(d => d.rsl_in),
+                                    borderColor: '#ff7300',
+                                    backgroundColor: 'rgba(255, 115, 0, 0.1)',
+                                    tension: 0.4
+                                }, {
+                                    label: 'RSL Out (dBm)',
+                                    data: data.map(d => d.rsl_out),
+                                    borderColor: '#387908',
+                                    backgroundColor: 'rgba(56, 121, 8, 0.1)',
+                                    tension: 0.4
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: true }
+                                }
+                            }
+                        });
+                        break;
+
+                    case 'hopcount-time':
+                        this.currentChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: data.map(d => d.time),
+                                datasets: [{
+                                    label: 'Hopcount',
+                                    data: data.map(d => d.hopcount),
+                                    borderColor: '#8b5cf6',
+                                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                                    stepped: true
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: true }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: false
+                                    }
+                                }
+                            }
+                        });
+                        break;
+
+                    case 'rpl-time':
+                        this.currentChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: data.map(d => d.time),
+                                datasets: [{
+                                    label: 'RPL Rank',
+                                    data: data.map(d => d.rpl_rank),
+                                    borderColor: '#ec4899',
+                                    backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                                    tension: 0.4
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: true }
+                                }
+                            }
+                        });
+                        break;
+
+                    case 'rsl-reciprocity':
+                        if (this.selectedLocation === 'all') {
+                            const datasets = [
+                                { label: 'Location 1', data: location1Data.map(d => ({x: d.rsl_out, y: d.rsl_in})), backgroundColor: '#8884d8' },
+                                { label: 'Location 2', data: location2Data.map(d => ({x: d.rsl_out, y: d.rsl_in})), backgroundColor: '#82ca9d' },
+                                { label: 'Location 3', data: location3Data.map(d => ({x: d.rsl_out, y: d.rsl_in})), backgroundColor: '#ffc658' },
+                                { label: 'Location 4', data: location4Data.map(d => ({x: d.rsl_out, y: d.rsl_in})), backgroundColor: '#ff7300' }
+                            ];
+                            this.currentChart = new Chart(ctx, {
+                                type: 'scatter',
+                                data: { datasets },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: { display: true }
+                                    },
+                                    scales: {
+                                        x: { title: { display: true, text: 'RSL Out (dBm)' } },
+                                        y: { title: { display: true, text: 'RSL In (dBm)' } }
+                                    }
+                                }
+                            });
+                        } else {
+                            this.currentChart = new Chart(ctx, {
+                                type: 'scatter',
+                                data: {
+                                    datasets: [{
+                                        label: this.selectedLocation,
+                                        data: data.map(d => ({x: d.rsl_out, y: d.rsl_in})),
+                                        backgroundColor: '#8884d8'
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: { display: true }
+                                    },
+                                    scales: {
+                                        x: { title: { display: true, text: 'RSL Out (dBm)' } },
+                                        y: { title: { display: true, text: 'RSL In (dBm)' } }
+                                    }
+                                }
+                            });
+                        }
+                        break;
+
+                    case 'hopcount-rsl':
+                        if (this.selectedLocation === 'all') {
+                            const datasets = [
+                                { label: 'Location 1', data: location1Data.map(d => ({x: d.rsl_in, y: d.hopcount})), backgroundColor: '#8884d8' },
+                                { label: 'Location 2', data: location2Data.map(d => ({x: d.rsl_in, y: d.hopcount})), backgroundColor: '#82ca9d' },
+                                { label: 'Location 3', data: location3Data.map(d => ({x: d.rsl_in, y: d.hopcount})), backgroundColor: '#ffc658' },
+                                { label: 'Location 4', data: location4Data.map(d => ({x: d.rsl_in, y: d.hopcount})), backgroundColor: '#ff7300' }
+                            ];
+                            this.currentChart = new Chart(ctx, {
+                                type: 'scatter',
+                                data: { datasets },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: { display: true }
+                                    },
+                                    scales: {
+                                        x: { title: { display: true, text: 'RSL In (dBm)' } },
+                                        y: { title: { display: true, text: 'Hopcount' } }
+                                    }
+                                }
+                            });
+                        } else {
+                            this.currentChart = new Chart(ctx, {
+                                type: 'scatter',
+                                data: {
+                                    datasets: [{
+                                        label: this.selectedLocation,
+                                        data: data.map(d => ({x: d.rsl_in, y: d.hopcount})),
+                                        backgroundColor: '#8b5cf6'
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: { display: true }
+                                    },
+                                    scales: {
+                                        x: { title: { display: true, text: 'RSL In (dBm)' } },
+                                        y: { title: { display: true, text: 'Hopcount' } }
+                                    }
+                                }
+                            });
+                        }
+                        break;
+
+                    case 'location-comparison':
+                        const locationStats = {};
+                        Object.entries(allData).forEach(([loc, data]) => {
+                            const temps = data.map(d => d.temp);
+                            const rslIns = data.map(d => d.rsl_in);
+                            const rslOuts = data.map(d => d.rsl_out);
+                            locationStats[loc] = {
+                                avgTemp: (temps.reduce((a,b) => a+b, 0) / temps.length).toFixed(1),
+                                avgRslIn: (rslIns.reduce((a,b) => a+b, 0) / rslIns.length).toFixed(1),
+                                avgRslOut: (rslOuts.reduce((a,b) => a+b, 0) / rslOuts.length).toFixed(1)
+                            };
+                        });
+
+                        const labels = Object.keys(locationStats).map(l => l.replace('Location ', 'L'));
+                        
+                        this.currentChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Avg Temperature (°C)',
+                                    data: Object.values(locationStats).map(s => parseFloat(s.avgTemp)),
+                                    backgroundColor: '#8884d8'
+                                }, {
+                                    label: 'Avg RSL In (dBm)',
+                                    data: Object.values(locationStats).map(s => parseFloat(s.avgRslIn)),
+                                    backgroundColor: '#ff7300'
+                                }, {
+                                    label: 'Avg RSL Out (dBm)',
+                                    data: Object.values(locationStats).map(s => parseFloat(s.avgRslOut)),
+                                    backgroundColor: '#387908'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: true }
+                                }
+                            }
+                        });
+                        break;
+                }
+            }
         }
 
-        // Try to initialize immediately
-        let attempts = 0;
-        const maxAttempts = 20;
+        // Initialize app when DOM is ready - ONLY ONCE
+        let appInitialized = false;
         
-        function tryInit() {
-            if (initializeMap()) {
-                console.log('Map initialized successfully');
-            } else if (attempts < maxAttempts) {
-                attempts++;
-                setTimeout(tryInit, 200);
-            } else {
-                document.getElementById('loading').innerHTML = 'Failed to load map. Please refresh the page.';
+        function initializeVisualizationApp() {
+            if (appInitialized) return;
+            appInitialized = true;
+            
+            const vizTab = document.getElementById('viz-tab');
+            if (!vizTab) {
+                setTimeout(initializeVisualizationApp, 100);
+                return;
             }
+            
+            new VisualizationApp();
         }
 
-        // Start trying to initialize after a short delay
-        setTimeout(tryInit, 100);
-    });
-</script>
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeVisualizationApp);
+        } else {
+            initializeVisualizationApp();
+        }
+    </script>
 </body>
 </html>
