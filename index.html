@@ -708,6 +708,8 @@
                 this.selectedViz = 'temperature-time';
                 this.selectedLocation = 'all';
                 this.currentChart = null;
+                // Shift display of time labels by +5 hours (11→4, 12→5, 15→8)
+                this.timeOffsetHours = 5;
                 this.init();
             }
 
@@ -775,6 +777,18 @@
                 `;
 
                 this.renderStats();
+            }
+
+            // Convert 'HH:MM' to label shifted by timeOffsetHours and formatted in 12-hour "h:MM" without AM/PM
+            formatTimeLabel(timeStr) {
+                if (typeof timeStr !== 'string' || !timeStr.includes(':')) return timeStr;
+                const [hStr, mStr] = timeStr.split(':');
+                const h = Math.max(0, Math.min(23, parseInt(hStr, 10)));
+                const m = Math.max(0, Math.min(59, parseInt(mStr, 10)));
+                const shifted = (h + this.timeOffsetHours) % 24;
+                const hour12 = ((shifted + 11) % 12) + 1; // 0→12, 13→1, etc.
+                const mm = m.toString().padStart(2, '0');
+                return `${hour12}:${mm}`;
             }
 
             renderStats() {
@@ -895,7 +909,7 @@
                         this.currentChart = new Chart(ctx, {
                             type: 'line',
                             data: {
-                                labels: data.map(d => d.time),
+                                labels: data.map(d => this.formatTimeLabel(d.time)),
                                 datasets: [{
                                     label: 'Temperature (°C)',
                                     data: data.map(d => d.temp),
@@ -918,7 +932,7 @@
                         this.currentChart = new Chart(ctx, {
                             type: 'line',
                             data: {
-                                labels: data.map(d => d.time),
+                                labels: data.map(d => this.formatTimeLabel(d.time)),
                                 datasets: [{
                                     label: 'Humidity (%)',
                                     data: data.map(d => d.humidity),
@@ -941,7 +955,7 @@
                         this.currentChart = new Chart(ctx, {
                             type: 'line',
                             data: {
-                                labels: data.map(d => d.time),
+                                labels: data.map(d => this.formatTimeLabel(d.time)),
                                 datasets: [{
                                     label: 'RSL In (dBm)',
                                     data: data.map(d => d.rsl_in),
@@ -970,7 +984,7 @@
                         this.currentChart = new Chart(ctx, {
                             type: 'line',
                             data: {
-                                labels: data.map(d => d.time),
+                                labels: data.map(d => this.formatTimeLabel(d.time)),
                                 datasets: [{
                                     label: 'Hopcount',
                                     data: data.map(d => d.hopcount),
@@ -998,7 +1012,7 @@
                         this.currentChart = new Chart(ctx, {
                             type: 'line',
                             data: {
-                                labels: data.map(d => d.time),
+                                labels: data.map(d => this.formatTimeLabel(d.time)),
                                 datasets: [{
                                     label: 'RPL Rank',
                                     data: data.map(d => d.rpl_rank),
